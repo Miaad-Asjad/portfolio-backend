@@ -12,7 +12,19 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  origin: function (origin, callback) {
+    
+    if (!origin || origin.includes("localhost") || origin.includes("127.0.0.1")) {
+      return callback(null, true);
+    }
+    
+    if (origin.endsWith(".vercel.app") || origin === process.env.CLIENT_URL) {
+      return callback(null, true);
+    }
+    
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true
 }));
 app.use(express.json({ limit: "10kb" }));
 
